@@ -5,20 +5,51 @@
 
 import { PrismaClient } from '@prisma/client'
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+// If DATABASE_URL is not set (for example during a preview deploy where
+// we don't want to connect to the real DB), export a lightweight mock that
+// returns safe defaults so the site can build and the UI can render.
+const hasDatabase = Boolean(process.env.DATABASE_URL)
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'error', 'warn'] 
-      : ['error'],
+if (!hasDatabase) {
+  console.warn('[prisma] DATABASE_URL not set — returning mock prisma for build/time without DB')
+
+  // model-level proxy that returns safe defaults for common methods
+  const modelProxy = new Proxy({}, {
+    get: (_target, method) => {
+      const m = String(method)
+      return async (..._args: any[]) => {
+        if (m === 'findMany') return []
+        if (m === 'findFirst' || m === 'findUnique') return null
+        if (m === 'count') return 0
+        if (m === 'create' || m === 'update' || m === 'delete' || m === 'upsert') return null
+        // default fallback
+        return null
+      }
+    }
   })
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+  const proxy = new Proxy({}, {
+    get: (_target, _model) => modelProxy
+  })
 
-export default prisma
+  // export as any so imports keep working
+  export const prisma: any = proxy
+  export default prisma
+
+} else {
+  const globalForPrisma = globalThis as unknown as {
+    prisma: PrismaClient | undefined
+  }
+
+  export const prisma =
+    globalForPrisma.prisma ??
+    new PrismaClient({
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    })
+
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = prisma
+  }
+
+  export default prisma
+}
