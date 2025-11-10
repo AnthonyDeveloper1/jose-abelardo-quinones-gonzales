@@ -6,7 +6,6 @@
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
-    "DATABASE_URL": "@database_url",
     "JWT_SECRET": "@jwt_secret",
     "S3_REGION": "@s3_region",
     "S3_ENDPOINT": "@s3_endpoint",
