@@ -56,21 +56,22 @@ model Publication {
   status          String    @default("borrador") @map("estado") @db.VarChar(50)
   authorId        Int?      @map("id_usuario")
   categoryId      Int?      @map("id_categoria")
-  createdAt       DateTime  @default(now()) @map("fecha_publicacion") @db.Timestamp()
+  createdAt       DateTime  @default(now()) @map("fecha_creacion") @db.Timestamp()
   updatedAt       DateTime  @default(now()) @map("fecha_actualizacion") @db.Timestamp()
-  
+
   author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   tags            PublicationTag[]
   comments        Comment[]
   visits          Visit[]
-  
+
   @@index([slug], map: "idx_publicaciones_slug")
   @@index([status], map: "idx_publicaciones_estado")
   @@index([authorId], map: "idx_publicaciones_usuario")
   @@index([categoryId], map: "idx_publicaciones_categoria")
   @@map("publicaciones")
 }
+
 
 // ==================== TABLA 4: ETIQUETAS ====================
 model Tag {
@@ -175,7 +176,7 @@ model Director {
   position        String?   @map("cargo") @db.VarChar(200)
   photo           String?   @map("foto") @db.VarChar(500)
   description     String?   @map("descripcion") @db.Text
-  status          String    @default("activo") @map("estado") @db.VarChar(50)
+  status          Boolean   @default(true) @map("estado")
   registeredAt    DateTime  @default(now()) @map("fecha_registro") @db.Timestamp()
   
   @@map("directivos")
@@ -202,7 +203,7 @@ model AuditLog {
 model Visit {
   id              Int       @id @default(autoincrement()) @map("id_visita")
   publicationId   Int       @map("id_publicacion")
-  ipAddress       String?   @map("ip") @db.VarChar(100)
+  ipAddress       String?   @map("direccion_ip") @db.VarChar(45)
   userAgent       String?   @map("user_agent") @db.Text
   visitedAt       DateTime  @default(now()) @map("fecha_visita") @db.Timestamp()
   

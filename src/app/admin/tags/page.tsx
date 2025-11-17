@@ -31,7 +31,8 @@ export default function TagsPage() {
 
   const loadTags = async () => {
     try {
-      const response = await fetch('/api/tags')
+      const headers = getAuthHeaders()
+      const response = await fetch('/api/tags', { headers })
       if (response.ok) {
         const data = await response.json()
         setTags(Array.isArray(data) ? data : [])

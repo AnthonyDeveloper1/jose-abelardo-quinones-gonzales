@@ -6,12 +6,13 @@ import Image from 'next/image'
 
 interface Director {
   id: number
-  nombre: string
-  cargo: string
-  descripcion: string | null
-  fotoUrl: string | null
-  orden: number
-  fechaCreacion: string
+  fullName: string
+  position: string
+  description: string | null
+  photo: string | null
+  status: boolean
+  registeredAt: string
+  orden?: number // Si existe en la BD
 }
 
 export default function DirectorsPage() {
@@ -33,7 +34,8 @@ export default function DirectorsPage() {
 
   const loadDirectors = async () => {
     try {
-      const response = await fetch('/api/directors')
+      const headers = getAuthHeaders()
+      const response = await fetch('/api/directors', { headers })
       if (response.ok) {
         const data = await response.json()
         setDirectors(Array.isArray(data) ? data : [])
@@ -78,11 +80,11 @@ export default function DirectorsPage() {
   const handleEdit = (director: Director) => {
     setEditingDirector(director)
     setFormData({
-      nombre: director.nombre,
-      cargo: director.cargo,
-      descripcion: director.descripcion || '',
-      fotoUrl: director.fotoUrl || '',
-      orden: director.orden,
+      nombre: director.fullName,
+      cargo: director.position,
+      descripcion: director.description || '',
+      fotoUrl: director.photo || '',
+      orden: director.orden ?? 0,
     })
     setShowForm(true)
   }
@@ -238,24 +240,24 @@ export default function DirectorsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {directors.map((director) => (
           <div key={director.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            {director.fotoUrl && (
+            {director.photo && (
               <div className="relative h-48 bg-gray-100">
                 <Image
-                  src={director.fotoUrl}
-                  alt={director.nombre}
+                  src={director.photo}
+                  alt={director.fullName}
                   fill
                   className="object-cover"
                 />
               </div>
             )}
             <div className="p-4">
-              <h3 className="font-bold text-lg">{director.nombre}</h3>
-              <p className="text-blue-600 text-sm mb-2">{director.cargo}</p>
-              {director.descripcion && (
-                <p className="text-sm text-gray-600 mb-3">{director.descripcion}</p>
+              <h3 className="font-bold text-lg">{director.fullName}</h3>
+              <p className="text-blue-600 text-sm mb-2">{director.position}</p>
+              {director.description && (
+                <p className="text-sm text-gray-600 mb-3">{director.description}</p>
               )}
               <div className="flex justify-between items-center text-sm text-gray-500">
-                <span>Orden: {director.orden}</span>
+                <span>Orden: {director.orden ?? 0}</span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(director)}

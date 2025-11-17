@@ -26,7 +26,8 @@ export default function CommentsPage() {
 
   const loadComments = async () => {
     try {
-      const response = await fetch('/api/comments')
+      const headers = getAuthHeaders()
+      const response = await fetch('/api/comments', { headers })
       if (response.ok) {
         const data = await response.json()
         setComments(Array.isArray(data) ? data : [])

@@ -88,7 +88,7 @@ npm run docker:down
 ```
 
 Los servicios estarán disponibles en:
-- **PostgreSQL**: `localhost:5432`
+- **PostgreSQL**: `localhost:5433` (el contenedor mapea 5432 -> 5433 en el host)
 - **MinIO Console**: `http://localhost:9001` (user: minioadmin, pass: minioadmin123)
 - **PgAdmin**: `http://localhost:5050` (user: admin@colegio.local, pass: admin123)
 

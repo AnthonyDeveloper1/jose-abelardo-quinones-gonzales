@@ -30,8 +30,8 @@ export default function GalleryPage() {
       const url = typeFilter === 'all' 
         ? '/api/gallery' 
         : `/api/gallery?type=${typeFilter}`
-      
-      const response = await fetch(url)
+      const headers = getAuthHeaders()
+      const response = await fetch(url, { headers })
       if (response.ok) {
         const data = await response.json()
         setImages(Array.isArray(data) ? data : [])

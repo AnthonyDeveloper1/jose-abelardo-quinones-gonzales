@@ -113,8 +113,10 @@ async function main() {
   // 4. Crear publicaciones de ejemplo
   console.log('📝 Creando publicaciones...')
   
-  const pub1 = await prisma.publication.create({
-    data: {
+  const pub1 = await prisma.publication.upsert({
+    where: { slug: 'bienvenidos-ano-escolar-2025' },
+    update: {},
+    create: {
       title: 'Bienvenidos al año escolar 2025',
       slug: 'bienvenidos-ano-escolar-2025',
       description: 'Iniciamos un nuevo año lleno de oportunidades y aprendizaje',
@@ -129,8 +131,10 @@ async function main() {
     },
   })
 
-  const pub2 = await prisma.publication.create({
-    data: {
+  const pub2 = await prisma.publication.upsert({
+    where: { slug: 'torneo-deportivo-interescolar-2025' },
+    update: {},
+    create: {
       title: 'Torneo Deportivo Interescolar 2025',
       slug: 'torneo-deportivo-interescolar-2025',
       description: 'Nuestro colegio participará en el torneo deportivo regional',
@@ -146,14 +150,28 @@ async function main() {
   })
 
   // Asignar etiquetas a publicaciones
-  await prisma.publicationTag.createMany({
-    data: [
-      { publicationId: pub1.id, tagId: tags[0].id }, // Noticias
-      { publicationId: pub1.id, tagId: tags[2].id }, // Académico
-      { publicationId: pub2.id, tagId: tags[1].id }, // Eventos
-      { publicationId: pub2.id, tagId: tags[3].id }, // Deportes
-    ],
-  })
+  await Promise.all([
+    prisma.publicationTag.upsert({
+      where: { publicationId_tagId: { publicationId: pub1.id, tagId: tags[0].id } },
+      update: {},
+      create: { publicationId: pub1.id, tagId: tags[0].id },
+    }),
+    prisma.publicationTag.upsert({
+      where: { publicationId_tagId: { publicationId: pub1.id, tagId: tags[2].id } },
+      update: {},
+      create: { publicationId: pub1.id, tagId: tags[2].id },
+    }),
+    prisma.publicationTag.upsert({
+      where: { publicationId_tagId: { publicationId: pub2.id, tagId: tags[1].id } },
+      update: {},
+      create: { publicationId: pub2.id, tagId: tags[1].id },
+    }),
+    prisma.publicationTag.upsert({
+      where: { publicationId_tagId: { publicationId: pub2.id, tagId: tags[3].id } },
+      update: {},
+      create: { publicationId: pub2.id, tagId: tags[3].id },
+    }),
+  ])
 
   console.log(`✅ Publicaciones creadas: 2`)
 
@@ -228,7 +246,8 @@ async function main() {
         fullName: 'Dr. Juan Pérez',
         position: 'Director General',
         description: 'Director con más de 20 años de experiencia en educación',
-        status: 'activo',
+        photo: '',
+        status: true,
       },
     }),
     prisma.director.create({
@@ -236,7 +255,8 @@ async function main() {
         fullName: 'Lic. Ana Martínez',
         position: 'Subdirectora Académica',
         description: 'Especialista en pedagogía y desarrollo curricular',
-        status: 'activo',
+        photo: '',
+        status: true,
       },
     }),
   ])
