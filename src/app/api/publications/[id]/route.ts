@@ -15,8 +15,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const param = params.id;
+    const isNumeric = /^\d+$/.test(param);
+    const where = isNumeric ? { id: parseInt(param) } : { slug: param };
     const publication = await prisma.publication.findUnique({
-      where: { id: parseInt(params.id) },
+      where,
       include: {
         author: {
           select: {
@@ -38,6 +41,14 @@ export async function GET(
         _count: {
           select: { visits: true },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true,
+          },
+        },
       },
     })
     
@@ -57,7 +68,22 @@ export async function GET(
       },
     })
     
-    return NextResponse.json(publication)
+    // Mapear los campos para el frontend igual que en /api/publications
+    const mapped = publication ? {
+      id: publication.id,
+      titulo: publication.title ?? '',
+      slug: publication.slug,
+      descripcion: publication.description ?? '',
+      contenido: publication.content ?? '',
+      imagen_principal: publication.mainImage ?? '',
+      estado: publication.status ?? '',
+      fecha_creacion: publication.createdAt,
+      etiquetas: publication.tags?.map((t: any) => ({ nombre: t.tag.name })) ?? [],
+      categoria: publication.category ? { id: publication.category.id, nombre: publication.category.name, icono: publication.category.icon, color: publication.category.color } : null,
+      id_categoria: publication.category?.id || null,
+      // autor: publication.author ? { nombre_completo: publication.author.fullName, id_usuario: publication.author.id, usuario: publication.author.username } : { nombre_completo: '' },
+    } : publication;
+    return NextResponse.json(mapped)
   } catch (error) {
     console.error('Error al obtener publicación:', error)
     return NextResponse.json(
@@ -119,6 +145,7 @@ export async function PUT(
         content: validatedData.content,
         mainImage: validatedData.mainImage,
         status: validatedData.status,
+        categoryId: validatedData.categoryId ?? null,
         ...(validatedData.tagIds && {
           tags: {
             deleteMany: {},
@@ -139,8 +166,22 @@ export async function PUT(
         tags: {
           include: { tag: true },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true,
+          },
+        },
       },
     })
+    // Mapear categoryId para el frontend
+    const mapped = publication ? {
+      ...publication,
+      categoryId: publication.category?.id || null,
+    } : publication;
+    return NextResponse.json(mapped)
     
     return NextResponse.json(publication)
   } catch (error) {

@@ -28,13 +28,28 @@ export async function uploadImage(file: string, folder: string = 'colegio') {
         { quality: 'auto', fetch_format: 'auto' } // Optimización automática
       ]
     })
-    
+
+    // Si es video, generar thumbnail (frame)
+    let thumbnailUrl = null;
+    if (result.resource_type === 'video') {
+      // Cloudinary: obtener frame en el segundo 1
+      thumbnailUrl = cloudinary.url(result.public_id, {
+        resource_type: 'video',
+        format: 'jpg',
+        transformation: [
+          { width: 400, height: 225, crop: 'fill' },
+          { start_offset: '1', flags: 'animated', duration: 0.01 }
+        ]
+      });
+    }
+
     return {
       url: result.secure_url,
       publicId: result.public_id,
       width: result.width,
       height: result.height,
-      format: result.format
+      format: result.format,
+      thumbnailUrl
     }
   } catch (error) {
     console.error('Error subiendo a Cloudinary:', error)

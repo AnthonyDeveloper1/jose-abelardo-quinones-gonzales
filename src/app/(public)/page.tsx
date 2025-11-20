@@ -59,75 +59,71 @@ export default async function HomePage() {
       {/* HERO CAROUSEL */}
       <HeroCarousel />
 
-      {/* VISIÓN Y MISIÓN - Diseño Horizontal Profesional */}
-      <section className="py-24 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-slate-100 text-slate-600 text-sm font-semibold rounded-full mb-4">
-              Nuestros Principios
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              Visión y Misión
-            </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Guiados por valores sólidos y un compromiso inquebrantable con la excelencia educativa
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* VISIÓN */}
-            <div className="group">
-              <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-3xl p-8 h-full hover:shadow-2xl hover:border-slate-300 transition-all duration-500 hover:-translate-y-2">
-                <div className="flex items-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-500">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900">Nuestra Visión</h3>
-                </div>
-                <p className="text-slate-600 leading-relaxed text-lg">
-                  Ser una institución educativa líder reconocida por su excelencia académica, 
-                  formación en valores y preparación integral de estudiantes capaces de enfrentar 
-                  los retos del mundo globalizado con ética y responsabilidad social.
-                </p>
-                <div className="mt-6 flex items-center text-blue-600 font-semibold group-hover:translate-x-2 transition-transform duration-300">
-                  <span>Nuestro futuro</span>
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
+      {/* RESUMEN INSTITUCIONAL */}
+      <section className="py-12 bg-gradient-to-br from-blue-100 via-white to-blue-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-950 mb-10 text-center">Identidad y Valores Institucionales</h2>
+          <div className="grid md:grid-cols-5 gap-8">
+            {/* Valores institucionales, centrados y equilibrados */}
+            <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
+              <span className="text-blue-800 text-2xl mb-2">💠</span>
+              <h3 className="font-bold text-blue-950 mb-2 text-lg">Valores</h3>
+              <ul className="text-gray-700 text-sm text-center space-y-1">
+                <li><strong>Responsabilidad:</strong> Puntualidad, orden, compromiso.</li>
+                <li><strong>Respeto:</strong> Vocabulario adecuado, cuidado patrimonial.</li>
+                <li><strong>Solidaridad:</strong> Apoyo mutuo, empatía.</li>
+                <li><strong>Integridad:</strong> Honestidad, justicia, autocrítica.</li>
+                <li><strong>Identidad:</strong> Pertenencia institucional y cultural.</li>
+              </ul>
             </div>
-
-            {/* MISIÓN */}
-            <div className="group">
-              <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-3xl p-8 h-full hover:shadow-2xl hover:border-slate-300 transition-all duration-500 hover:-translate-y-2">
-                <div className="flex items-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-500">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900">Nuestra Misión</h3>
-                </div>
-                <p className="text-slate-600 leading-relaxed text-lg">
-                  Formar estudiantes íntegros con sólidos conocimientos académicos, valores éticos 
-                  y habilidades para la vida, mediante una educación de calidad que promueva el 
-                  pensamiento crítico, la creatividad y el compromiso con su comunidad.
-                </p>
-                <div className="mt-6 flex items-center text-purple-600 font-semibold group-hover:translate-x-2 transition-transform duration-300">
-                  <span>Nuestro propósito</span>
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
+            <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
+              <span className="text-blue-800 text-2xl mb-2">📘</span>
+              <h3 className="font-bold text-blue-950 mb-2 text-lg">Propuesta Pedagógica</h3>
+              <ul className="text-gray-700 text-sm text-center space-y-1">
+                <li>Currículo Nacional y enfoque por competencias.</li>
+                <li>Modelo EIB urbano, reconocimiento del quechua.</li>
+                <li>Docente mediador, estudiante protagonista.</li>
+                <li>Evaluación formativa y retroalimentación.</li>
+                <li>Diversificación curricular local.</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
+              <span className="text-blue-800 text-2xl mb-2">🎓</span>
+              <h3 className="font-bold text-blue-950 mb-2 text-lg">Perfil de Egreso</h3>
+              <ul className="text-gray-700 text-sm text-center space-y-1">
+                <li>Identidad cultural y ciudadanía democrática.</li>
+                <li>Vida saludable y apreciación artística.</li>
+                <li>Indagación científica y resolución de problemas.</li>
+                <li>Emprendimiento y uso responsable de TIC.</li>
+                <li>Aprendizaje autónomo.</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
+              <span className="text-blue-800 text-2xl mb-2">🏫</span>
+              <h3 className="font-bold text-blue-950 mb-2 text-lg">Datos Generales</h3>
+              <ul className="text-gray-700 text-sm text-center space-y-1">
+                <li><strong>Nombre:</strong> I.E.P. “José Abelardo Quiñones Gonzales”</li>
+                <li><strong>Ubicación:</strong> Av. Las Malvinas s/n, Las Américas – San Juan Bautista, Huamanga – Ayacucho</li>
+                <li><strong>UGEL:</strong> Huamanga</li>
+                <li><strong>DRE:</strong> Ayacucho</li>
+                <li><strong>Niveles:</strong> Inicial, Primaria y Secundaria</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
+              <span className="text-blue-800 text-2xl mb-2">👨‍🏫</span>
+              <h3 className="font-bold text-blue-950 mb-2 text-lg">Equipo Directivo</h3>
+              <ul className="text-gray-700 text-sm text-center space-y-1">
+                <li><strong>Director:</strong> Prof. Teodulfo Juan Pacotaípe Huaycha</li>
+                <li><strong>Subdirector Secundaria:</strong> Lic. Iván Saúl Quispe Sulca</li>
+                <li><strong>Subdirectores Inicial/Primaria:</strong> Lic. Luz Pacotaípe Allcca y Lic. Eleuterio Huamani Palomino</li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
+
+      {/* VISIÓN Y MISIÓN - Diseño Horizontal Profesional */}
+      {/* Sección eliminada para evitar duplicidad de misión/visión */}
 
       {/* POR QUÉ ELEGIRNOS - Nueva Sección */}
       <section className="py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
@@ -201,13 +197,13 @@ export default async function HomePage() {
               Sobre Nosotros
             </span>
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-              Excelencia Educativa desde 2005
+              I.E.P. “José Abelardo Quiñones Gonzales”
             </h2>
             <p className="text-slate-600 leading-relaxed text-lg mb-6">
-              Somos una institución educativa comprometida con la <span className="font-semibold text-slate-900">excelencia académica</span> y la formación integral de nuestros estudiantes.
+              Institución educativa líder en Ayacucho, comprometida con la excelencia académica, innovación pedagógica y formación integral de estudiantes críticos, autónomos y creativos.
             </p>
             <p className="text-slate-600 leading-relaxed text-lg mb-8">
-              Con más de <span className="font-semibold text-slate-900">20 años de experiencia</span>, brindamos educación de calidad que prepara a los jóvenes para los desafíos del futuro mediante metodologías innovadoras y un equipo docente altamente calificado.
+              Fundada en 1990, ampliada a secundaria en 2001 e inicial en 2009. Atendemos 1250 estudiantes con 58 docentes y 4 directivos, en turnos mañana y tarde, bajo el modelo EIB urbano y el Currículo Nacional.
             </p>
             
             {/* Características destacadas */}

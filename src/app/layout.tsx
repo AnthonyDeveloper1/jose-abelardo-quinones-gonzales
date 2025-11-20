@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -29,11 +30,17 @@ export default function RootLayout({
         {/* End Google Tag Manager */}
       </head>
       <body className={inter.variable}>
+        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KZJVL937" height="0" width="0" style={{display:'none',visibility:'hidden'}}></iframe>
         </noscript>
         {/* End Google Tag Manager (noscript) */}
+        {/* Toast global para avisos personalizados */}
+        <div id="global-toast-root">
+          {/* @ts-ignore */}
+          {typeof window !== 'undefined' && require('../components/GlobalToast').default()}
+        </div>
         {children}
       </body>
     </html>

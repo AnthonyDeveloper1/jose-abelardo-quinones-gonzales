@@ -8,13 +8,14 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
-    const userRole = request.headers.get('x-user-role')
-    
-    if (userRole !== 'Administrador' && userRole !== 'Super Administrador') {
+    const userRole = request.headers.get('x-user-role');
+    const userId = request.headers.get('x-user-id');
+    // Solo el rol Administrador (id=1) puede ver usuarios
+    if (userRole !== 'Administrador' || userId !== '1') {
       return NextResponse.json(
         { error: 'Sin permisos' },
         { status: 403 }
-      )
+      );
     }
     
     const users = await prisma.user.findMany({

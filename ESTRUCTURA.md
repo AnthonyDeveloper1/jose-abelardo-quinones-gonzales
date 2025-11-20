@@ -1,7 +1,7 @@
 # 📋 ESTRUCTURA DEL PROYECTO
 
 ```
-websitecolegio/
+jose-abelardo-quinones-gonzales/
 │
 ├── 📄 docker-compose.yml              # Orquestación Docker (PostgreSQL, MinIO, PgAdmin)
 ├── 📄 .env.example                    # Plantilla de variables de entorno

@@ -11,8 +11,8 @@ interface Publication {
   slug: string
   descripcion: string | null
   contenido: string
-  imagenUrl: string | null
-  createdAt: string
+  imagen_principal?: string | null
+  fecha_creacion?: string
   usuario: {
     fullName: string
   }
@@ -22,6 +22,7 @@ interface Publication {
       slug: string
     }
   }[]
+  etiquetas?: Array<{ nombre: string }>;
 }
 
 interface Reaction {
@@ -72,11 +73,11 @@ export default function PublicationDetailPage() {
 
   const loadPublication = async () => {
     try {
-      const response = await fetch(`/api/publications?slug=${slug}&status=published`)
+      const response = await fetch(`/api/publications/${slug}`)
       if (response.ok) {
         const data = await response.json()
-        if (Array.isArray(data) && data.length > 0) {
-          setPublication(data[0])
+        if (data && data.id) {
+          setPublication(data)
         } else {
           router.push('/publicaciones')
         }
@@ -212,32 +213,28 @@ export default function PublicationDetailPage() {
           </h1>
           
           <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-4">
-            <span className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              {new Date(publication.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-            <span className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              {publication.usuario.fullName}
-            </span>
+            {publication.fecha_creacion && !isNaN(Date.parse(publication.fecha_creacion)) && (
+              <span className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {new Date(publication.fecha_creacion).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            )}
           </div>
 
-          {publication.tags.length > 0 && (
+          {Array.isArray(publication.etiquetas) && publication.etiquetas.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {publication.tags.map((t, idx) => (
+              {publication.etiquetas.map((t, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1 bg-gray-800 text-white text-sm rounded-full"
+                  className="px-3 py-1 bg-blue-900 text-white text-sm rounded-full"
                 >
-                  {t.tag.nombre}
+                  {t.nombre}
                 </span>
               ))}
             </div>
@@ -245,23 +242,31 @@ export default function PublicationDetailPage() {
         </header>
 
         {/* Imagen destacada */}
-        {publication.imagenUrl && (
-          <div className="relative h-96 mb-8 rounded-lg overflow-hidden bg-gray-200">
-            <Image
-              src={publication.imagenUrl}
-              alt={publication.titulo}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+        {publication.imagen_principal && (
+          publication.imagen_principal.endsWith('.mp4') ? (
+            <div className="relative h-96 mb-8 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
+              <video src={publication.imagen_principal} controls className="h-full w-full object-cover rounded" />
+            </div>
+          ) : (
+            <div className="relative h-96 mb-8 rounded-lg overflow-hidden bg-gray-200">
+              <Image
+                src={publication.imagen_principal}
+                alt={publication.titulo}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )
         )}
 
         {/* Contenido */}
-        <div 
-          className="prose prose-lg max-w-none mb-12"
-          dangerouslySetInnerHTML={{ __html: publication.contenido }}
-        />
+        {publication.contenido && (
+          <div 
+            className="prose prose-lg max-w-none mb-12"
+            dangerouslySetInnerHTML={{ __html: publication.contenido }}
+          />
+        )}
 
         {/* Reacciones */}
         <div className="border-t border-b border-gray-200 py-6 mb-8">
@@ -347,7 +352,7 @@ export default function PublicationDetailPage() {
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="px-6 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors"
               >
                 Enviar comentario
               </button>

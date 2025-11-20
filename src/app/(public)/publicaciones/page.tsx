@@ -11,18 +11,17 @@ interface Tag {
 }
 
 interface Publication {
-  id: number
-  titulo: string
-  slug: string
-  descripcion: string | null
-  imagenUrl: string | null
-  createdAt: string
-  usuario: {
-    fullName: string
-  }
-  tags: {
-    tag: Tag
-  }[]
+  id: number;
+  titulo: string;
+  slug: string;
+  descripcion: string | null;
+  contenido?: string;
+  imagen_principal?: string | null;
+  videoThumbnail?: string | null;
+  estado?: string;
+  fecha_creacion?: string;
+  etiquetas?: { nombre: string }[];
+  categoria?: { id: number; nombre: string; icono?: string; color?: string } | null;
 }
 
 export default function PublicacionesPage() {
@@ -34,6 +33,14 @@ export default function PublicacionesPage() {
   useEffect(() => {
     loadTags()
     loadPublications()
+  }, [selectedTag])
+
+  // Recargar publicaciones cada 30 segundos para mostrar nuevas actualizaciones
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadPublications()
+    }, 30000)
+    return () => clearInterval(interval)
   }, [selectedTag])
 
   const loadTags = async () => {
@@ -55,7 +62,6 @@ export default function PublicacionesPage() {
       const url = selectedTag
         ? `/api/publications?status=published&tag=${selectedTag}`
         : '/api/publications?status=published'
-      
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
@@ -72,7 +78,7 @@ export default function PublicacionesPage() {
   return (
     <div>
       {/* HERO */}
-      <section className="bg-gray-800 text-white py-20">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold mb-4">Publicaciones</h1>
           <p className="text-xl text-gray-300">
@@ -90,7 +96,7 @@ export default function PublicacionesPage() {
               onClick={() => setSelectedTag(null)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 selectedTag === null
-                  ? 'bg-gray-800 text-white'
+                  ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -102,7 +108,7 @@ export default function PublicacionesPage() {
                 onClick={() => setSelectedTag(tag.slug)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                   selectedTag === tag.slug
-                    ? 'bg-gray-800 text-white'
+                    ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -131,13 +137,28 @@ export default function PublicacionesPage() {
                 >
                   {/* Imagen */}
                   <div className="relative h-64 bg-gray-200">
-                    {pub.imagenUrl ? (
-                      <Image
-                        src={pub.imagenUrl}
-                        alt={pub.titulo}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                    {pub.imagen_principal ? (
+                      pub.imagen_principal.endsWith('.mp4') && pub.videoThumbnail ? (
+                        <video
+                          src={pub.imagen_principal}
+                          className="absolute inset-0 w-full h-full object-cover rounded"
+                          poster={pub.videoThumbnail}
+                          controls={false}
+                        />
+                      ) : pub.imagen_principal.endsWith('.mp4') ? (
+                        <img
+                          src={"/video-poster.png"}
+                          alt={pub.titulo}
+                          className="absolute inset-0 w-full h-full object-cover rounded"
+                        />
+                      ) : (
+                        <Image
+                          src={pub.imagen_principal}
+                          alt={pub.titulo}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      )
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,29 +180,23 @@ export default function PublicacionesPage() {
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {new Date(pub.createdAt).toLocaleDateString('es-ES', {
+                        {pub.fecha_creacion ? new Date(pub.fecha_creacion).toLocaleDateString('es-ES', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
-                        })}
-                      </span>
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        {pub.usuario.fullName}
+                        }) : ''}
                       </span>
                     </div>
 
                     {/* Tags */}
-                    {pub.tags.length > 0 && (
+                    {Array.isArray(pub.etiquetas) && pub.etiquetas.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {pub.tags.map((t, idx) => (
+                        {pub.etiquetas.map((t, idx) => (
                           <span
                             key={idx}
                             className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
                           >
-                            {t.tag.nombre}
+                            {t.nombre}
                           </span>
                         ))}
                       </div>

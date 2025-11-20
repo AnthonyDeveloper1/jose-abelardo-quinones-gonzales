@@ -18,7 +18,7 @@ Sistema completo de gestión web para instituciones educativas construido con Ne
 ## 📁 Estructura del Proyecto
 
 ```
-websitecolegio/
+jose-abelardo-quinones-gonzales/
 ├── prisma/                    # Esquema y migraciones de BD
 │   ├── schema.prisma
 │   ├── seed.ts

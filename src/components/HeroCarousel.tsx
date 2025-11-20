@@ -5,19 +5,24 @@ import Image from 'next/image'
 
 const carouselImages = [
   {
-    url: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1200',
+    url: '/images/portada1.jpg',
     title: 'Excelencia Académica',
     description: 'Formando líderes del mañana'
   },
   {
-    url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200',
+    url: '/images/portada2.jpg',
     title: 'Educación Integral',
     description: 'Desarrollando el potencial de cada estudiante'
   },
   {
-    url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200',
-    title: 'Innovación y Tecnología',
-    description: 'Preparados para el futuro'
+    url: '/images/portada3.jpg',
+    title: 'Nuestro Equipo Docente',
+    description: 'Profesores comprometidos con la formación y el acompañamiento de cada estudiante.'
+  },
+  {
+    url: '/images/portada4.jpg',
+    title: 'Tecnología en el Aula',
+    description: 'Estudiantes aprendiendo con tablets y recursos digitales para el futuro.'
   }
 ]
 
@@ -25,12 +30,12 @@ export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselImages.length)
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [])
+    let timeout: NodeJS.Timeout;
+    timeout = setTimeout(() => {
+      setCurrentSlide((prev) => prev === carouselImages.length - 1 ? 0 : prev + 1);
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [currentSlide, carouselImages.length]);
 
   return (
     <section className="relative h-[500px] overflow-hidden bg-slate-900">
@@ -62,12 +67,6 @@ export default function HeroCarousel() {
                   {slide.description}
                 </p>
                 <div className="flex gap-4">
-                  <a
-                    href="/publicaciones"
-                    className="px-8 py-3 bg-white text-slate-900 rounded-full font-semibold hover:bg-slate-100 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-                  >
-                    Ver más
-                  </a>
                   <a
                     href="/contacto"
                     className="px-8 py-3 border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-slate-900 transition-all duration-200 shadow-lg"

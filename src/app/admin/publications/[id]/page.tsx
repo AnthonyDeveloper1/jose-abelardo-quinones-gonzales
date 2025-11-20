@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { toast } from 'react-hot-toast'
 import { useRouter, useParams } from 'next/navigation'
 import { getAuthHeaders } from '@/lib/client-auth'
 import dynamic from 'next/dynamic'
@@ -19,7 +20,7 @@ interface Publication {
   slug: string
   description: string | null
   content: string
-  imageUrl: string | null
+  mainImage: string | null
   status: string
   tags: Array<{
     tag: {
@@ -27,6 +28,13 @@ interface Publication {
       name: string
     }
   }>
+  categoryId?: number | null
+  categoria?: {
+    id: number
+    name: string
+    icon?: string
+    color?: string
+  } | null
 }
 
 export default function EditPublicationPage() {
@@ -35,20 +43,28 @@ export default function EditPublicationPage() {
   const [loading, setLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [tags, setTags] = useState<Tag[]>([])
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    content: '',
-    imageUrl: '',
-    status: 'draft' as 'draft' | 'published',
-    tagIds: [] as number[],
-  })
-
-  useEffect(() => {
-    loadTags()
-    loadPublication()
-  }, [])
+  const [categories, setCategories] = useState<any[]>([])
+  const [formData, setFormData] = useState<{
+    title: string;
+    slug: string;
+    description: string;
+    content: string;
+    mainImage: string;
+    status: 'draft' | 'published';
+    tagIds: number[];
+    categoryId: number | null;
+  }>(
+    {
+      title: '',
+      slug: '',
+      description: '',
+      content: '',
+      mainImage: '',
+      status: 'draft',
+      tagIds: [],
+      categoryId: null,
+    }
+  )
 
   const loadTags = async () => {
     try {
@@ -69,15 +85,16 @@ export default function EditPublicationPage() {
       const response = await fetch(`/api/publications/${params.id}`, { headers })
       
       if (response.ok) {
-        const pub: Publication = await response.json()
+        const pub: any = await response.json()
         setFormData({
-          title: pub.title,
+          title: pub.titulo,
           slug: pub.slug,
-          description: pub.description || '',
-          content: pub.content,
-          imageUrl: pub.imageUrl || '',
-          status: pub.status as 'draft' | 'published',
-          tagIds: pub.tags.map(t => t.tag.id),
+          description: pub.descripcion || '',
+          content: pub.contenido || '',
+          mainImage: pub.imagen_principal || '',
+          status: pub.estado as 'draft' | 'published',
+          tagIds: Array.isArray(pub.etiquetas) ? pub.etiquetas.map((t: any) => t.id).filter(Boolean) : [],
+          categoryId: pub.categoria?.id || null,
         })
       } else {
         alert('Error al cargar publicación')
@@ -92,7 +109,7 @@ export default function EditPublicationPage() {
 
   const handleTagToggle = (tagId: number) => {
     const tagIds = formData.tagIds.includes(tagId)
-      ? formData.tagIds.filter(id => id !== tagId)
+      ? formData.tagIds.filter((id: number) => id !== tagId)
       : [...formData.tagIds, tagId]
     setFormData({ ...formData, tagIds })
   }
@@ -103,21 +120,37 @@ export default function EditPublicationPage() {
 
     try {
       const headers = getAuthHeaders()
+      // Si mainImage está vacío, lo enviamos como undefined
+      const dataToSend = {
+        ...formData,
+        mainImage: formData.mainImage && formData.mainImage.trim() !== '' ? formData.mainImage : undefined,
+      }
       const response = await fetch(`/api/publications/${params.id}`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Error al actualizar')
+        const errorData = await response.json()
+        if (response.status === 401) {
+          toast.error('No autorizado. Inicia sesión nuevamente.')
+        } else if (response.status === 403) {
+          toast.error('Sin permisos para editar esta publicación.')
+        } else if (response.status === 404) {
+          toast.error('Publicación no encontrada.')
+        } else if (response.status === 400) {
+          toast.error(errorData.error || 'Datos inválidos')
+        } else {
+          toast.error(errorData.error || 'Error al actualizar')
+        }
+        return
       }
 
-      alert('Publicación actualizada exitosamente')
+      toast.success('Publicación actualizada exitosamente')
       router.push('/admin/publications')
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al actualizar')
+      toast.error(error instanceof Error ? error.message : 'Error al actualizar')
     } finally {
       setLoading(false)
     }
@@ -133,6 +166,20 @@ export default function EditPublicationPage() {
       ['clean']
     ],
   }), [])
+
+  // Cargar categorías
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (response.ok) {
+        const data = await response.json()
+        setCategories(Array.isArray(data) ? data : [])
+      }
+    } catch (error) {
+      console.error('Error cargando categorías:', error)
+      setCategories([])
+    }
+  }
 
   if (loadingData) {
     return <div className="text-center py-8">Cargando...</div>
@@ -176,14 +223,33 @@ export default function EditPublicationPage() {
           />
         </div>
 
+        {/* Categoría */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Imagen destacada</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+          <select
+            value={formData.categoryId || ''}
+            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value ? parseInt(e.target.value) : null })}
+            className="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="">Sin categoría</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.icon} {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Imagen destacada */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Imagen/Video destacado</label>
           <div className="flex gap-2">
             <input
               type="url"
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              value={formData.mainImage}
+              onChange={(e) => setFormData({ ...formData, mainImage: e.target.value })}
               className="flex-1 px-4 py-2 border rounded-lg"
+              placeholder="URL de imagen o video (.mp4)"
             />
             <button
               type="button"
@@ -192,9 +258,22 @@ export default function EditPublicationPage() {
             >
               📁 Galería
             </button>
+            {formData.mainImage && (
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, mainImage: '' })}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+              >
+                🗑️ Eliminar archivo
+              </button>
+            )}
           </div>
-          {formData.imageUrl && (
-            <img src={formData.imageUrl} alt="Preview" className="mt-2 h-32 object-cover rounded" />
+          {formData.mainImage && (
+            formData.mainImage.endsWith('.mp4') ? (
+              <video src={formData.mainImage} controls className="mt-2 h-32 rounded" />
+            ) : (
+              <img src={formData.mainImage} alt="Preview" className="mt-2 h-32 object-cover rounded" />
+            )
           )}
         </div>
 

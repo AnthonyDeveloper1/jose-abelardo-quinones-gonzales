@@ -76,38 +76,162 @@ export async function sendContactNotification(
     <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #2563eb; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-          .content { background: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
-          .field { margin-bottom: 15px; }
-          .label { font-weight: bold; color: #1f2937; }
-          .value { color: #4b5563; margin-top: 5px; }
-          .footer { text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            background-color: #f3f4f6;
+            padding: 20px;
+          }
+          .email-wrapper {
+            max-width: 650px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          .header { 
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white; 
+            padding: 32px 24px;
+            text-align: center;
+          }
+          .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+          }
+          .header .icon {
+            font-size: 32px;
+          }
+          .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+          }
+          .content { 
+            padding: 32px 24px;
+            background: #ffffff;
+          }
+          .info-card {
+            background: #f9fafb;
+            border-left: 4px solid #2563eb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+          }
+          .field { 
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .field:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+          }
+          .label { 
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+          }
+          .value { 
+            color: #4b5563;
+            font-size: 15px;
+            line-height: 1.6;
+          }
+          .message-box {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 8px;
+          }
+          .footer { 
+            text-align: center;
+            padding: 24px;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 13px;
+            border-top: 1px solid #e5e7eb;
+          }
+          .footer strong {
+            color: #374151;
+          }
+          @media only screen and (max-width: 600px) {
+            .email-wrapper {
+              border-radius: 0;
+            }
+            .header, .content, .footer {
+              padding: 20px 16px;
+            }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
+        <div class="email-wrapper">
           <div class="header">
-            <h2>📧 Nuevo Mensaje de Contacto</h2>
+            <h1>
+              <span class="icon">📧</span>
+              Contacto desde la Web
+            </h1>
+            <div class="badge">FORMULARIO DE CONTACTO</div>
           </div>
           <div class="content">
-            <div class="field">
-              <div class="label">De:</div>
-              <div class="value">${contactData.name} (${contactData.email})</div>
-            </div>
-            <div class="field">
-              <div class="label">Asunto:</div>
-              <div class="value">${contactData.subject}</div>
-            </div>
-            <div class="field">
-              <div class="label">Mensaje:</div>
-              <div class="value">${contactData.message.replace(/\n/g, '<br>')}</div>
+            <p style="font-size: 15px; color: #6b7280; margin-bottom: 24px;">
+              Has recibido un nuevo mensaje desde el formulario de contacto del sitio web:
+            </p>
+            
+            <div class="info-card">
+              <div class="field">
+                <span class="label">👤 Remitente</span>
+                <div class="value"><strong>${contactData.name}</strong></div>
+              </div>
+              
+              <div class="field">
+                <span class="label">📬 Correo Electrónico</span>
+                <div class="value">
+                  <a href="mailto:${contactData.email}" style="color: #2563eb; text-decoration: none;">
+                    ${contactData.email}
+                  </a>
+                </div>
+              </div>
+              
+              <div class="field">
+                <span class="label">📋 Asunto</span>
+                <div class="value">${contactData.subject}</div>
+              </div>
+              
+              <div class="field">
+                <span class="label">💬 Mensaje</span>
+                <div class="message-box">
+                  ${contactData.message.replace(/\n/g, '<br>')}
+                </div>
+              </div>
             </div>
           </div>
           <div class="footer">
-            Este correo fue enviado desde el formulario de contacto del sitio web del colegio.
+            <strong>🏫 Sistema de Contacto Web</strong><br>
+            Este correo fue generado automáticamente desde el formulario de contacto de tu sitio web.<br>
+            <span style="color: #9ca3af; font-size: 12px;">No responder a este correo. Responde directamente a ${contactData.email}</span>
           </div>
         </div>
       </body>
@@ -116,7 +240,7 @@ export async function sendContactNotification(
 
   return sendEmail({
     to: recipients,
-    subject: `Nuevo contacto: ${contactData.subject}`,
+    subject: `🌐 Contacto Web: ${contactData.subject}`,
     html,
   })
 }

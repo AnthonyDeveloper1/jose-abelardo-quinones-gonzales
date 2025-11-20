@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getAuthFromRequest, hasRole } from '@/lib/api-auth'
 
 // GET - Obtener un correo de destino
 export async function GET(
@@ -14,9 +15,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userRole = request.headers.get('x-user-role')
+    const auth = getAuthFromRequest(request)
     
-    if (userRole !== 'Administrador' && userRole !== 'Super Administrador' && userRole !== 'Editor') {
+    if (!hasRole(auth, ['Administrador', 'Super Administrador', 'Editor'])) {
       return NextResponse.json(
         { error: 'Sin permisos' },
         { status: 403 }
@@ -59,9 +60,9 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userRole = request.headers.get('x-user-role')
+    const auth = getAuthFromRequest(request)
     
-    if (userRole !== 'Administrador' && userRole !== 'Super Administrador') {
+    if (!hasRole(auth, ['Administrador', 'Super Administrador'])) {
       return NextResponse.json(
         { error: 'Sin permisos' },
         { status: 403 }
@@ -139,9 +140,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userRole = request.headers.get('x-user-role')
+    const auth = getAuthFromRequest(request)
     
-    if (userRole !== 'Administrador' && userRole !== 'Super Administrador') {
+    if (!hasRole(auth, ['Administrador', 'Super Administrador'])) {
       return NextResponse.json(
         { error: 'Solo administradores pueden eliminar correos' },
         { status: 403 }

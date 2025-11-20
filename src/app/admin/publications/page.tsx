@@ -6,21 +6,17 @@ import { getAuthHeaders } from '@/lib/client-auth'
 import Link from 'next/link'
 
 interface Publication {
-  id: number
-  title: string
-  slug: string
-  description: string | null
-  imageUrl: string | null
-  status: string
-  createdAt: string
-  author: {
-    fullName: string
-  }
-  tags: Array<{
-    tag: {
-      name: string
-    }
-  }>
+  // ...existing code...
+  id: number;
+  titulo: string;
+  slug: string;
+  descripcion: string;
+  contenido?: string;
+  imagen_principal?: string | null;
+  estado?: string;
+  fecha_creacion?: string;
+  etiquetas?: { nombre: string }[];
+  categoria?: { id: number; nombre: string; icono?: string; color?: string } | null;
 }
 
 export default function PublicationsPage() {
@@ -63,7 +59,16 @@ export default function PublicationsPage() {
       if (response.ok) {
         setPublications(publications.filter(p => p.id !== id))
       } else {
-        alert('Error al eliminar')
+        const errorData = await response.json()
+        if (response.status === 401) {
+          alert('No autorizado. Inicia sesión nuevamente.')
+        } else if (response.status === 403) {
+          alert('Sin permisos para eliminar esta publicación.')
+        } else if (response.status === 404) {
+          alert('Publicación no encontrada.')
+        } else {
+          alert(errorData.error || 'Error al eliminar')
+        }
       }
     } catch (error) {
       alert('Error al eliminar publicación')
@@ -72,7 +77,7 @@ export default function PublicationsPage() {
 
   const filteredPublications = publications.filter(pub => {
     if (filter === 'all') return true
-    return pub.status === filter
+    return pub.estado === filter
   })
 
   if (loading) {
@@ -103,13 +108,13 @@ export default function PublicationsPage() {
             onClick={() => setFilter('published')}
             className={`px-4 py-2 rounded ${filter === 'published' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
           >
-            Publicadas ({publications.filter(p => p.status === 'published').length})
+            Publicadas ({publications.filter(p => p.estado === 'published').length})
           </button>
           <button
             onClick={() => setFilter('draft')}
             className={`px-4 py-2 rounded ${filter === 'draft' ? 'bg-yellow-500 text-white' : 'bg-gray-200'}`}
           >
-            Borradores ({publications.filter(p => p.status === 'draft').length})
+            Borradores ({publications.filter(p => p.estado === 'draft').length})
           </button>
         </div>
       </div>
@@ -119,10 +124,13 @@ export default function PublicationsPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Título</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Autor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
+              {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Autor</th> */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Etiquetas</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contenido</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
             </tr>
           </thead>
@@ -130,26 +138,58 @@ export default function PublicationsPage() {
             {filteredPublications.map((pub) => (
               <tr key={pub.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{pub.title}</div>
+                  <div className="text-sm font-medium text-gray-900">{pub.titulo}</div>
                   <div className="text-sm text-gray-500">{pub.slug}</div>
                 </td>
+                <td className="px-6 py-4">
+                  {pub.imagen_principal ? (
+                    pub.imagen_principal.endsWith('.mp4') ? (
+                      <video
+                        src={pub.imagen_principal}
+                        className="h-12 w-20 object-cover rounded border bg-black"
+                        poster="/video-poster.png"
+                        controls={false}
+                      >
+                        Tu navegador no soporta videos.
+                      </video>
+                    ) : (
+                      <img
+                        src={pub.imagen_principal}
+                        alt={pub.titulo}
+                        className="h-12 w-20 object-cover rounded border"
+                      />
+                    )
+                  ) : (
+                    <span className="text-gray-400">Sin imagen</span>
+                  )}
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {pub.author.fullName}
+                  {pub.categoria ? (
+                    <span className="inline-flex items-center gap-1">
+                      {pub.categoria.icono && <span>{pub.categoria.icono}</span>}
+                      <span>{pub.categoria.nombre}</span>
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">Sin categoría</span>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 text-xs rounded-full ${
-                    pub.status === 'published' 
+                    pub.estado === 'published' 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {pub.status === 'published' ? 'Publicado' : 'Borrador'}
+                    {pub.estado === 'published' ? 'Publicado' : 'Borrador'}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {pub.tags.map(t => t.tag.name).join(', ')}
+                  {Array.isArray(pub.etiquetas) ? pub.etiquetas.map(t => t.nombre).join(', ') : ''}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(pub.createdAt).toLocaleDateString()}
+                  {pub.fecha_creacion ? new Date(pub.fecha_creacion).toLocaleDateString() : ''}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  {pub.contenido ? pub.contenido.slice(0, 100) + (pub.contenido.length > 100 ? '...' : '') : ''}
                 </td>
                 <td className="px-6 py-4 text-right text-sm font-medium">
                   <Link

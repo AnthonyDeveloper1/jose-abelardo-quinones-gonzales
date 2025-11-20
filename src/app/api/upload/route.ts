@@ -68,7 +68,8 @@ export async function POST(request: NextRequest) {
       height: result.height,
       format: result.format,
       size: file.size,
-      mimetype: file.type
+      mimetype: file.type,
+      thumbnailUrl: result.thumbnailUrl || null
     }, { status: 201 })
   } catch (error) {
     console.error('Error al subir archivo:', error)

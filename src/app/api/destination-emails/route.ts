@@ -6,13 +6,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getAuthFromRequest, hasRole } from '@/lib/api-auth'
 
 // GET - Listar correos de destino
 export async function GET(request: NextRequest) {
   try {
-    const userRole = request.headers.get('x-user-role')
+    const auth = getAuthFromRequest(request)
     
-    if (userRole !== 'Administrador' && userRole !== 'Super Administrador' && userRole !== 'Editor') {
+    if (!hasRole(auth, ['Administrador', 'Super Administrador', 'Editor'])) {
       return NextResponse.json(
         { error: 'Sin permisos' },
         { status: 403 }
@@ -42,9 +43,9 @@ export async function GET(request: NextRequest) {
 // POST - Crear correo de destino
 export async function POST(request: NextRequest) {
   try {
-    const userRole = request.headers.get('x-user-role')
+    const auth = getAuthFromRequest(request)
     
-    if (userRole !== 'Administrador' && userRole !== 'Super Administrador') {
+    if (!hasRole(auth, ['Administrador', 'Super Administrador'])) {
       return NextResponse.json(
         { error: 'Sin permisos' },
         { status: 403 }

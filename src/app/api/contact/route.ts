@@ -52,7 +52,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('📥 Datos recibidos en API:', body)
+    
     const validatedData = contactMessageSchema.parse(body)
+    console.log('✅ Datos validados:', validatedData)
     
     const message = await prisma.contactMessage.create({
       data: validatedData,
@@ -89,11 +92,12 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(message, { status: 201 })
   } catch (error) {
-    console.error('Error al crear mensaje:', error)
+    console.error('❌ Error al crear mensaje:', error)
     
     if (error instanceof Error && error.name === 'ZodError') {
+      console.error('❌ Error de validación Zod:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: 'Datos inválidos' },
+        { error: 'Datos inválidos', details: error },
         { status: 400 }
       )
     }

@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         username: user.username,
         fullName: user.fullName,
-        role: user.role?.name || null,
+        roleName: user.role?.name || null,
       },
     })
   } catch (error) {

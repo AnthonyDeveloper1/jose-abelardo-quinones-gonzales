@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, ChangeEvent } from 'react'
-import { getToken } from '@/lib/client-auth'
+import { getToken, getUser } from '@/lib/client-auth'
 import Image from 'next/image'
 
 interface UploadedFile {
@@ -73,13 +73,17 @@ export default function ImageUploader({
         throw new Error('No autenticado')
       }
 
-      const formData = new FormData()
-      formData.append('file', file)
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'colegio/test');
 
+      const user = getUser();
       const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
+          'x-user-id': user ? String(user.id) : '',
+          'x-user-role': user && user.roleName ? user.roleName : '',
         },
         body: formData,
       })
@@ -89,14 +93,18 @@ export default function ImageUploader({
         throw new Error(error.error || 'Error al subir archivo')
       }
 
-      const data: UploadedFile = await response.json()
-      onUploadSuccess(data)
-      setPreview(null)
-      setIsVideo(false)
-      
+      const data: any = await response.json();
+      // Manejar respuesta igual que el test
+      if (data.success) {
+        onUploadSuccess(data);
+      } else {
+        onUploadError?.(data.error || 'Error al subir archivo');
+      }
+      setPreview(null);
+      setIsVideo(false);
       // Reset input
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+        fileInputRef.current.value = '';
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error al subir archivo'

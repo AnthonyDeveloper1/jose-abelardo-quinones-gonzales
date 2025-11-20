@@ -25,9 +25,11 @@ export const createPublicationSchema = z.object({
   slug: z.string().min(3).regex(/^[a-z0-9-]+$/),
   description: z.string().optional(),
   content: z.string().min(10),
-  mainImage: z.string().url().optional(),
+  mainImage: z.string().url({ message: 'Debe ser una URL válida de imagen o video.' }).optional(),
+  videoThumbnail: z.union([z.string().url(), z.null()]).optional(),
   status: z.string().default('borrador'),
   tagIds: z.array(z.number()).optional(),
+  categoryId: z.number().int().nullable().optional(),
 })
 
 export const updatePublicationSchema = createPublicationSchema.partial()
@@ -65,6 +67,7 @@ export const updateDirectorSchema = createDirectorSchema.partial()
 export const contactMessageSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
+  phone: z.string().optional().nullable(),
   subjectId: z.number().int().positive().optional(),
   message: z.string().min(10),
 })

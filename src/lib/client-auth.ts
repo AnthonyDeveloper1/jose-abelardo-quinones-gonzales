@@ -75,18 +75,31 @@ export const isSuperAdmin = (): boolean => {
 // Headers con autenticación
 export const getAuthHeaders = () => {
   const token = getToken()
-  return {
+  const user = getUser()
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
   }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  if (user) {
+    headers['x-user-role'] = user.roleName
+    headers['x-user-id'] = user.id.toString()
+  }
+  return headers
 }
 
 // Headers con autenticación para FormData (sin Content-Type)
 export const getAuthHeadersForFormData = () => {
   const token = getToken()
+  const user = getUser()
   const headers: HeadersInit = {}
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
+  }
+  if (user) {
+    headers['x-user-role'] = user.roleName
+    headers['x-user-id'] = user.id.toString()
   }
   return headers
 }

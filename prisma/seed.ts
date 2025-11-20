@@ -263,6 +263,27 @@ async function main() {
 
   console.log(`✅ Directivos creados: ${directors.length}`)
 
+  // 9. Crear categorías
+  console.log('🏷️ Creando categorías...')
+  const categorias = [
+    { name: 'Actividades Escolares', slug: 'actividades-escolares', description: 'Eventos y actividades escolares', color: '#2563eb', order: 1 },
+    { name: 'Deportes', slug: 'deportes', description: 'Actividades deportivas', color: '#22c55e', order: 2 },
+    { name: 'Cultura', slug: 'cultura', description: 'Eventos culturales', color: '#f59e42', order: 3 },
+    { name: 'Eventos', slug: 'eventos', description: 'Eventos especiales', color: '#eab308', order: 4 },
+    { name: 'Noticias', slug: 'noticias', description: 'Noticias y comunicados', color: '#ef4444', order: 5 },
+    { name: 'Talleres', slug: 'talleres', description: 'Talleres y capacitaciones', color: '#a855f7', order: 6 },
+    { name: 'Académico', slug: 'academico', description: 'Información académica', color: '#0ea5e9', order: 7 },
+  ];
+  for (const cat of categorias) {
+    await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: {},
+      create: cat,
+    });
+  }
+
+  console.log(`✅ Categorías creadas: ${categorias.length}`)
+
   console.log('\n🎉 Seed completado exitosamente!')
   console.log('\n📋 Credenciales de acceso:')
   console.log('   Admin:  admin@colegio.edu / admin123')

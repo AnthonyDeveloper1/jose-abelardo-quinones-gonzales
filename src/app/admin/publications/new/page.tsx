@@ -26,10 +26,11 @@ interface PublicationFormData {
   slug: string
   description: string
   content: string
-  imageUrl: string
+  mainImage: string
   status: 'draft' | 'published'
   categoryId: number | null
   tagIds: number[]
+  videoThumbnail?: string
 }
 
 export default function NewPublicationPage() {
@@ -43,7 +44,8 @@ export default function NewPublicationPage() {
     slug: '',
     description: '',
     content: '',
-    imageUrl: '',
+    mainImage: '',
+    videoThumbnail: undefined,
     status: 'draft',
     categoryId: null,
     tagIds: [],
@@ -104,19 +106,26 @@ export default function NewPublicationPage() {
     setFormData({ ...formData, tagIds })
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Permite subir imagen o video mp4
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     // Validar tipo
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona una imagen válida')
+    const isImage = file.type.startsWith('image/')
+    const isVideo = file.type === 'video/mp4'
+    if (!isImage && !isVideo) {
+      alert('Por favor selecciona una imagen o video mp4 válido')
       return
     }
 
-    // Validar tamaño (10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validar tamaño (máx 10MB para imagen, 50MB para video)
+    if (isImage && file.size > 10 * 1024 * 1024) {
       alert('La imagen es muy grande. Máximo 10MB')
+      return
+    }
+    if (isVideo && file.size > 50 * 1024 * 1024) {
+      alert('El video es muy grande. Máximo 50MB')
       return
     }
 
@@ -134,15 +143,20 @@ export default function NewPublicationPage() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Error al subir imagen')
+        throw new Error(error.error || 'Error al subir archivo')
       }
 
       const data = await response.json()
-      setFormData({ ...formData, imageUrl: data.url })
-      alert('✅ Imagen subida exitosamente')
+      // Si es video, guardar también el thumbnail
+      if (isVideo && data.thumbnailUrl) {
+        setFormData({ ...formData, mainImage: data.url, videoThumbnail: data.thumbnailUrl })
+      } else {
+        setFormData({ ...formData, mainImage: data.url, videoThumbnail: undefined })
+      }
+      alert(isImage ? '✅ Imagen subida exitosamente' : '✅ Video subido exitosamente')
     } catch (error) {
       console.error('Error:', error)
-      alert('Error al subir imagen: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      alert('Error al subir archivo: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     } finally {
       setUploading(false)
     }
@@ -153,24 +167,49 @@ export default function NewPublicationPage() {
     setLoading(true)
 
     try {
-      const headers = getAuthHeaders()
+      const headers = getAuthHeaders();
+      // Limpiar valores vacíos
+      const dataToSend: any = { ...formData };
+      if (!formData.mainImage || formData.mainImage.trim() === '') {
+        dataToSend.mainImage = undefined;
+      }
+      if (!formData.videoThumbnail || formData.videoThumbnail.trim() === '') {
+        dataToSend.videoThumbnail = undefined;
+      }
+      console.log('[Crear publicación] Datos enviados:', dataToSend);
       const response = await fetch('/api/publications', {
         method: 'POST',
         headers,
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Error al crear publicación')
+        body: JSON.stringify(dataToSend),
+      });
+      let responseData = null;
+      try {
+        responseData = await response.json();
+        console.log('[Crear publicación] Respuesta:', responseData);
+      } catch (err) {
+        console.warn('[Crear publicación] No se pudo parsear JSON de la respuesta');
       }
-
-      alert('Publicación creada exitosamente')
-      router.push('/admin/publications')
+      if (!response.ok) {
+        // Mostrar ventana flotante con el mensaje exacto del backend
+        const errorMsg = (responseData && responseData.error) ? responseData.error : 'Error al crear publicación';
+        let detailsMsg = '';
+        if (responseData && responseData.details) {
+          detailsMsg = '\n' + responseData.details;
+        }
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: errorMsg + detailsMsg } }));
+        // Mostrar logs si hay detalles
+        if (responseData && responseData.logs) {
+          window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'info', message: 'Log: ' + responseData.logs } }));
+        }
+        throw new Error(errorMsg + detailsMsg);
+      }
+      window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: 'Publicación creada exitosamente' } }));
+      router.push('/admin/publications');
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al crear publicación')
+      console.error('[Crear publicación] Error:', error);
+      window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: error instanceof Error ? error.message : 'Error al crear publicación' } }));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -256,39 +295,48 @@ export default function NewPublicationPage() {
           </select>
         </div>
 
-        {/* Imagen destacada */}
+        {/* Imagen/Video destacado */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Imagen destacada
+            Imagen/Video destacado
           </label>
           <div className="flex gap-2 mb-2">
             <input
               type="url"
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              value={formData.mainImage}
+              onChange={(e) => setFormData({ ...formData, mainImage: e.target.value })}
               className="flex-1 px-4 py-2 border rounded-lg"
-              placeholder="https://... o sube una imagen"
+              placeholder="https://... o sube una imagen/video"
             />
             <label className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2">
               {uploading ? '⏳ Subiendo...' : '📤 Subir'}
               <input
                 type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
+                accept="image/*,video/mp4"
+                onChange={handleMediaUpload}
                 disabled={uploading}
                 className="hidden"
               />
             </label>
           </div>
-          {formData.imageUrl && (
-            <img
-              src={formData.imageUrl}
-              alt="Preview"
-              className="mt-2 h-32 object-cover rounded"
-            />
+          {formData.mainImage && (
+            formData.mainImage.endsWith('.mp4') ? (
+              <video
+                src={formData.mainImage}
+                controls
+                className="mt-2 h-32 object-cover rounded"
+                poster={formData.videoThumbnail || "/video-poster.png"}
+              />
+            ) : (
+              <img
+                src={formData.mainImage}
+                alt="Preview"
+                className="mt-2 h-32 object-cover rounded"
+              />
+            )
           )}
           <p className="text-xs text-gray-500 mt-1">
-            Sube una imagen o pega una URL. Formatos: JPG, PNG, GIF, WEBP (máx 10MB)
+            Sube una imagen (JPG, PNG, GIF, WEBP máx 10MB) o video mp4 (máx 50MB), o pega una URL.
           </p>
         </div>
 
